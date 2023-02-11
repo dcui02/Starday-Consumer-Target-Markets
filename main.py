@@ -49,6 +49,7 @@ General Idea:
     - turn input into a profile
     - What is the population of the given attributes: 
         find number of profiles that match the attributes in the input profile (add up group_population_est)
-        - i.e. there are 50 profile groups that are between age 25-44
+        - i.e. there are 50 profile groups that are between age 25-44 or x amount of people from gen pop that fit
+            - this attribute 
     - use algorithm in problem 1 to find list of profiles that are most similar to target market 
 """

@@ -3,11 +3,11 @@ import numpy as np
 
 'primary demographics sheet'
 p_demo = pd.read_csv('/Users/davidcui02/Downloads/CDP_primary_demographics_v1.csv')
-'print(p_demo)'
+print(p_demo)
 
 'profile relationships sheet'
 p_relationships = pd.read_csv('/Users/davidcui02/Downloads/CDP_profile_relationships.csv')
-'print(p_relationships)'
+print(p_relationships)
 
 """
 'problem 1: When trying to build out our target market (i.e. collection of consumer profiles), ' 
@@ -26,8 +26,9 @@ General idea: greedy algorithm
     - smaller the distance = more similar 
     - sort the profiles by shortest to longest distance to the input id profile
     - add the profiles with the shortest distance to the output list until the target population is reached
-    
+
 How to calculate Euclidean distance between profiles? 
+    - use e_distance from p_relationships csv?
     - turn the attributes into some numerical version (get_dummies?)
     - how to weigh these attributes?  
 Use group_population_est to fill up population?
@@ -37,7 +38,6 @@ Use group_population_est to fill up population?
 When trying to expand our target market, I have a list of profiles that are currently included in our market 
     (sometimes expressed in aggregate) - I want to find the profiles that are 
     most similar to my target market but not presently included that will add x number of consumers to my market.
-
 Input Example: Age 25-44, No kids, urban or suburban, income below $200k - increase population by 100k
 Output Example: What is the population of the given attributes as well as a list of 
     the CDP_Profiles that are the most closely related to aggregated 
@@ -52,9 +52,3 @@ General Idea:
         - i.e. there are 50 profile groups that are between age 25-44
     - use algorithm in problem 1 to find list of profiles that are most similar to target market 
 """
-
-
-
-
-
-

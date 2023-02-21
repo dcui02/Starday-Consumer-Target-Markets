@@ -2,12 +2,8 @@ import pandas as pd
 import numpy as np
 from euclidean_d import CDP_profile_relationships
 
-
-"""
 'primary demographics sheet'
 p_demo = pd.read_csv('/Users/davidcui02/Downloads/CDP_primary_demographics_v1.csv')
-'print(p_demo)'
-"""
 
 'profile relationships sheet'
 p_relationships = pd.read_csv('/Users/davidcui02/Downloads/CDP_profile_relationships.csv')
@@ -38,6 +34,29 @@ How to calculate Euclidean distance between profiles?
 Use group_population_est to fill up population?
 """
 
+
+def building_market(target_id, population):
+    target_profiles = []
+    filtered_df = CDP_profile_relationships.loc[CDP_profile_relationships['ID_1'] == target_id]
+    sorted_df = filtered_df.sort_values(by='e_distance')
+
+    # iterate through the sorted dataframe and add profiles to the target list
+    for index, row in sorted_df.iterrows():
+        profile_id = row['ID_2']
+        population_est_total = p_demo.loc[p_demo['id'] == profile_id, 'group_population_est'].values[0]
+
+        # check if adding this profile's group_population_est will exceed the population limit
+        if population_est_total <= population:
+            target_profiles.append(profile_id)
+            population -= population_est_total
+
+        # if adding this profile's population_est_total will exceed the population limit, break the loop
+        if population <= 0:
+            break
+
+    return target_profiles
+
+
 """
 When trying to expand our target market, I have a list of profiles that are currently included in our market 
     (sometimes expressed in aggregate) - I want to find the profiles that are 
@@ -57,4 +76,6 @@ General Idea:
             - this attribute 
     - use algorithm in problem 1 to find list of profiles that are most similar to target market 
 """
-print(CDP_profile_relationships)
+
+## should return list with profiles 100001 and 100002
+print(building_market(100000, 286000))

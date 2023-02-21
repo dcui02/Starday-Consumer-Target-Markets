@@ -1,13 +1,17 @@
 import pandas as pd
 import numpy as np
+from euclidean_d import CDP_profile_relationships
 
+
+"""
 'primary demographics sheet'
 p_demo = pd.read_csv('/Users/davidcui02/Downloads/CDP_primary_demographics_v1.csv')
-print(p_demo)
+'print(p_demo)'
+"""
 
 'profile relationships sheet'
 p_relationships = pd.read_csv('/Users/davidcui02/Downloads/CDP_profile_relationships.csv')
-print(p_relationships)
+'print(p_relationships)'
 
 """
 'problem 1: When trying to build out our target market (i.e. collection of consumer profiles), ' 
@@ -53,3 +57,4 @@ General Idea:
             - this attribute 
     - use algorithm in problem 1 to find list of profiles that are most similar to target market 
 """
+print(CDP_profile_relationships)

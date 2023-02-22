@@ -28,7 +28,7 @@ import numpy as np
 'main primary demographics sheet'
 p_demo = pd.read_csv('/Users/davidcui02/Downloads/CDP_primary_demographics_v1.csv')
 
-## first create this binary sheet
+# first create this binary sheet
 # create a new DataFrame with only the required columns
 
 CDP_binary_df = p_demo[['id', 'age', 'children_ages_2_or_younger',
@@ -70,17 +70,18 @@ CDP_binary_df.drop('household_makeup', axis=1, inplace=True)
 
 # set the values in the columns for annual income
 CDP_binary_df['annual_household_income_$70,000 - $99,000'] = np.where(CDP_binary_df['annual_household_income'] ==
-                                                            '$70,000 - $99,000-24', 1, 0)
+                                                                      '$70,000 - $99,000', 1, 0)
 CDP_binary_df['annual_household_income_$100,000 - $199,000'] = np.where(CDP_binary_df['annual_household_income'] ==
-                                                              '$100,000 - $199,000-34', 1, 0)
-CDP_binary_df['annual_household_income_$200,000+'] = np.where(CDP_binary_df['annual_household_income'] == '$200,000+', 1, 0)
+                                                                        '$100,000 - $199,000', 1, 0)
+CDP_binary_df['annual_household_income_$200,000+'] = np.where(CDP_binary_df['annual_household_income'] == '$200,000+',
+                                                              1, 0)
 
 # drop the original 'annual_household_income' column
 CDP_binary_df.drop('annual_household_income', axis=1, inplace=True)
 
 # set the values in the columns for location density
 CDP_binary_df['location_density_urban'] = np.where(CDP_binary_df['location_density'] == 'urban', 1, 0)
-CDP_binary_df['location_density_suburb'] = np.where(CDP_binary_df['location_density'] == 'suburban', 1, 0)
+CDP_binary_df['location_density_suburb'] = np.where(CDP_binary_df['location_density'] == 'suburb', 1, 0)
 CDP_binary_df['location_density_rural'] = np.where(CDP_binary_df['location_density'] == 'rural', 1, 0)
 
 # drop the original 'location_density' column
@@ -634,7 +635,7 @@ CDP_profile_relationships = pd.DataFrame(CDP_profile_relationships_dict_list)
 
 # add a percentile column
 CDP_profile_relationships['distance_percentile'] = (
-            (CDP_profile_relationships.e_distance - CDP_profile_relationships.e_distance.min()) /
-            (CDP_profile_relationships.e_distance.max() - CDP_profile_relationships.e_distance.min()))
+        (CDP_profile_relationships.e_distance - CDP_profile_relationships.e_distance.min()) /
+        (CDP_profile_relationships.e_distance.max() - CDP_profile_relationships.e_distance.min()))
 
 CDP_profile_relationships

@@ -37,12 +37,13 @@ Use group_population_est to fill up population?
 
 def building_market(target_id, population):
     target_profiles = []
-    filtered_df = CDP_profile_relationships.loc[CDP_profile_relationships['ID_1'] == target_id]
+    filtered_df = CDP_profile_relationships.loc[(CDP_profile_relationships['ID_1'] == target_id)
+                                                | (CDP_profile_relationships['ID_2'] == target_id)]
     sorted_df = filtered_df.sort_values(by='e_distance')
 
     # iterate through the sorted dataframe and add profiles to the target list
     for index, row in sorted_df.iterrows():
-        profile_id = row['ID_2']
+        profile_id = row['ID_1'] if row['ID_2'] == target_id else row['ID_2']
         population_est_total = p_demo.loc[p_demo['id'] == profile_id, 'group_population_est'].values[0]
 
         # check if adding this profile's group_population_est will exceed the population limit
@@ -77,5 +78,5 @@ General Idea:
     - use algorithm in problem 1 to find list of profiles that are most similar to target market 
 """
 
-## should return list with profiles 100001 and 100002
+# should return list with profiles 100001 and 100002
 print(building_market(100000, 286000))

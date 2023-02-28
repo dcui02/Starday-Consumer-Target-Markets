@@ -299,16 +299,13 @@ def expand_market(age_range_minimum, age_range_maximum, makeup_of_household, den
     # concatenate the new dataframe with the existing p_demo dataframe
     new_p_demo = pd.concat([p_demo, new_df], ignore_index=True)
 
-    # desired population for the building market function
-    desired_population = market_population + population_increase
-
     # creates list of IDs of only the profiles of the aggregate marget that were added to p_demo
     id_list = new_p_demo.loc[new_p_demo['id'] >= [p_demo['id'].max() + 1], 'id'].tolist()
 
     # use building market function to get list of a list of
     # the CDP_Profiles that are the most closely related to aggregated
     # profile description that will raise of total population by the intended amount
-    output_list = building_market(id_list, desired_population, new_p_demo)
+    output_list = building_market(id_list, population_increase, new_p_demo)
 
     # market_population is the group_population_est of those that meet the aggregate profile
     # output_list is a list of CDP_profiles

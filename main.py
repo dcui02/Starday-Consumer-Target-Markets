@@ -123,12 +123,11 @@ def create_rows(dataframe, age_range, household_makeup, income_range, location_d
 # income_max: maximum income of desired target market
 # only 3 ranges for income in our dataset (70k-99k, 100k-199k, 200k+)
 def expand_market(age_range_minimum, age_range_maximum, makeup_of_household, density_of_location, income_min,
-                  income_max,
-                  population_increase):
+                  income_max, population_increase):
     # first filter out rows in p_demo that aren't in the desired household_makeup
-    filtered_df = p_demo.loc[p_demo['household_makeup'] == makeup_of_household]
     # then filter out rows in p_demo that aren't in the desired location_density
-    filtered_df = p_demo.loc[p_demo['location_density'] == density_of_location]
+    filtered_df = p_demo.loc[(p_demo['household_makeup'] == makeup_of_household) &
+                             (p_demo['location_density'] == density_of_location)]
 
     # create boolean to helps determine where the age range is
     # min_age_range_20_24 = (age_range_minimum >= '20')
@@ -276,6 +275,7 @@ def expand_market(age_range_minimum, age_range_maximum, makeup_of_household, den
         makes_more_200k = True
     else:
         makes_more_200k = False
+
     # determine which income ranges are apart of the desired group
     if makes_between_70k_99k & makes_between_100k_199k & makes_more_200k:
         income_range = ['$70,000 - $99,000', '$100,000 - $199,000', '$200,000+']

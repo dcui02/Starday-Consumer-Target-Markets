@@ -90,7 +90,8 @@ General Idea:
 
 
 # helper functions that creates rows that will be added to a dataframe
-def create_rows(dataframe, age_range, household_makeup, income_range, location_density):
+def create_rows(dataframe, age_range, household_makeup, kids_under_2, kids_3_5,
+                kids_6_9, kids_10_14, kids_15_17, income_range, location_density):
     for age in age_range:
         # create rows for each age range
         for income in income_range:
@@ -98,11 +99,11 @@ def create_rows(dataframe, age_range, household_makeup, income_range, location_d
             new_row = pd.DataFrame({'id': [dataframe['id'].max() + 1],
                                     'age': [age],
                                     'household_makeup': [household_makeup],
-                                    'children_ages_2_or_younger': ['n'],
-                                    'children_ages_3_5': ['n'],
-                                    'children_ages_6_9': ['n'],
-                                    'children_ages_10_14': ['n'],
-                                    'children_ages_15_17': ['n'],
+                                    'children_ages_2_or_younger': [kids_under_2],
+                                    'children_ages_3_5': [kids_3_5],
+                                    'children_ages_6_9': [kids_6_9],
+                                    'children_ages_10_14': [kids_10_14],
+                                    'children_ages_15_17': [kids_15_17],
                                     'annual_household_income': [income],
                                     'location_density': [location_density],
                                     'population_perc': [0],
@@ -114,30 +115,79 @@ def create_rows(dataframe, age_range, household_makeup, income_range, location_d
 # question: what if household has multiple children? are children even account for in this
 
 # explanations of variables:
-# age_range_minimum: minimum age of desired target market
-# age_range_maximum: maximum age of desired target market
+# int: age_range_minimum: minimum age of desired target market
+# int: age_range_maximum: maximum age of desired target market
 # only 4 ranges for age in our dataset (20-24, 25-34, 35-44, 45-54)
-# makeup_of_household: (3 options) "self" "With other adults only" or "With children"
-# density_of_location: (3 options) "urban" "suburb" or "rural"
-# income_min: minimum income of desired target market
-# income_max: maximum income of desired target market
+# string: makeup_of_household: (3 options) "self" "With other adults only" or "With children"
+# int: density_of_location: (3 options) "urban" "suburb" or "rural"
+# int: income_min: minimum income of desired target market
+# int: income_max: maximum income of desired target market
 # only 3 ranges for income in our dataset (70k-99k, 100k-199k, 200k+)
-def expand_market(age_range_minimum, age_range_maximum, makeup_of_household, density_of_location, income_min,
+# string: has_kids_under_2, has_kids_3_5, has_kids_6_9, has_kids_10_14, has_kids_15_17 either going to be 'n' or 'y'
+# to stay consistent with the csv
+def expand_market(age_range_minimum, age_range_maximum, makeup_of_household, has_kids_under_2, has_kids_3_5,
+                  has_kids_6_9, has_kids_10_14, has_kids_15_17, density_of_location, income_min,
                   income_max, population_increase):
+    # checking that each input is correct
+    # Validate age_range_minimum
+    if not isinstance(age_range_minimum, int):
+        return "age_range_minimum should be an integer"
+    if age_range_minimum < 20 or age_range_minimum > 54:
+        return "age_range_minimum should be between 20 and 54"
+
+    # Validate age_range_maximum
+    if not isinstance(age_range_maximum, int):
+        return "age_range_maximum should be an integer"
+    if age_range_maximum < 20 or age_range_maximum > 54:
+        return "age_range_maximum should be between 20 and 54"
+
+    # Validate makeup_of_household
+    valid_makeup_of_household_input = ["self", "With other adults only", "With children"]
+    if makeup_of_household not in valid_makeup_of_household_input:
+        return "makeup_of_household should be one of: self, With other adults only, With children"
+
+    # Validate has_kids_under_2, has_kids_3_5, has_kids_6_9, has_kids_10_14, has_kids_15_17
+    valid_has_kids_input = ["y", "n"]
+    if not all(x in valid_has_kids_input for x in [has_kids_under_2, has_kids_3_5,
+                                                   has_kids_6_9, has_kids_10_14, has_kids_15_17]):
+        return "has_kids_* variables should be 'y' or 'n'"
+
+    # Validate density_of_location
+    valid_density_of_location_input = ["urban", "suburb", "rural"]
+    if density_of_location not in valid_density_of_location_input:
+        return "density_of_location should be one of: urban, suburb, rural"
+
+    # Validate income_min
+    if not isinstance(income_min, int):
+        return "income_min should be an integer"
+
+    # Validate income_max
+    if not isinstance(income_max, int):
+        return "income_max should be an integer"
+
+    # Validate population_increase
+    if not isinstance(population_increase, int):
+        return "population_increase should be an integer"
+
     # first filter out rows in p_demo that aren't in the desired household_makeup
     # then filter out rows in p_demo that aren't in the desired location_density
     filtered_df = p_demo.loc[(p_demo['household_makeup'] == makeup_of_household) &
-                             (p_demo['location_density'] == density_of_location)]
+                             (p_demo['location_density'] == density_of_location) &
+                             (p_demo['children_ages_2_or_younger'] == has_kids_under_2) &
+                             (p_demo['children_ages_3_5'] == has_kids_3_5) &
+                             (p_demo['children_ages_6_9'] == has_kids_6_9) &
+                             (p_demo['children_ages_10_14'] == has_kids_10_14) &
+                             (p_demo['children_ages_15_17'] == has_kids_15_17)]
 
     # create boolean to helps determine where the age range is
     # min_age_range_20_24 = (age_range_minimum >= '20')
-    min_age_range_25_34 = (age_range_minimum >= '25')
-    min_age_range_35_44 = (age_range_minimum >= '35')
-    min_age_range_45_54 = (age_range_minimum >= '45')
+    min_age_range_25_34 = (age_range_minimum >= 25)
+    min_age_range_35_44 = (age_range_minimum >= 35)
+    min_age_range_45_54 = (age_range_minimum >= 45)
 
-    max_age_range_20_24 = (age_range_maximum <= '24')
-    max_age_range_25_34 = (age_range_maximum <= '34')
-    max_age_range_35_44 = (age_range_maximum <= '44')
+    max_age_range_20_24 = (age_range_maximum <= 24)
+    max_age_range_25_34 = (age_range_maximum <= 34)
+    max_age_range_35_44 = (age_range_maximum <= 44)
     # max_age_range_45_54 = (age_range_maximum <= '54')
 
     # if the minimum age range is greater than 45 then it can't be in any of other 3 age ranges so filter those out
@@ -192,106 +242,42 @@ def expand_market(age_range_minimum, age_range_maximum, makeup_of_household, den
     # represents the population of the given attributes
     market_population = filtered_df['group_population_est'].sum()
 
-    # defining the criteria for the new rows of the aggregate profile descriptions
-    household_makeup = makeup_of_household
-    location_density = density_of_location
+    # specify the age range bins
+    # (20-24, 25-34, 35-44, 45-54)
+    # the first interval is [20,25), which includes ages from 20 to 24 (inclusive of 20, but exclusive of 25).
+    # the second interval is [25,35), which includes ages from 25 to 34 (inclusive of 25, but exclusive of 35).
+    # the third interval is [35,45), which includes ages from 35 to 44 (inclusive of 35, but exclusive of 45).
+    # the fourth interval is [45,55), which includes ages from 45 to 54 (inclusive of 45, but exclusive of 55).
+    bins = [20, 25, 35, 45, 55]
+    labels = ['20-24', '25-34', '35-44', '45-54']
 
-    # boolean variables and determine if an age group is apart of the input
-    """
-    in_20_24_group
-    in_25_34_group
-    in_35_44_group
-    in_45_54_group
-    """
-    # determine the specific desired age ranges
-    # if max age of input is less than 24 then it is apart of 20-24 age group
-    # if min age of input is greater than 20 then it is apart of 20-24 age group
-    if age_range_maximum <= 24 | age_range_minimum >= 20:
-        in_20_24_group = True
-    else:
-        in_20_24_group = False
-    # if max age of input is less than 34 then it is apart of the 25-34 age group
-    # if min age of input is greater than 25 then it is apart of the 25-34 age group
-    if age_range_maximum <= 34 | age_range_minimum >= 25:
-        in_25_34_group = True
-    else:
-        in_25_34_group = False
-    # if max age of input is less than 44 then it is apart of the 35-44 age group
-    # if min age of input is greater than 35 then it is apart of the 35-44 age group
-    if age_range_maximum <= 44 | age_range_minimum >= 35:
-        in_35_44_group = True
-    else:
-        in_35_44_group = False
-    # if max age of input is less than 54 then it is apart of the 45-54 age group
-    # if min age of input is greater than 45 then it is apart of the 45-54 age group
-    if age_range_maximum <= 54 | age_range_minimum >= 45:
-        in_45_54_group = True
-    else:
-        in_45_54_group = False
+    # create a categorical variable for the input age range using pd.cut()
+    age_range = pd.cut([age_range_minimum, age_range_maximum], bins=bins, labels=labels)
 
-    # determine which age ranges are apart of the desired group
-    if in_20_24_group & in_25_34_group & in_35_44_group & in_45_54_group:
-        age_range = ['20-24', '25-34', '35-44', '45-54']
-    elif in_20_24_group & in_25_34_group & in_35_44_group:
-        age_range = ['20-24', '25-34', '35-44']
-    elif in_25_34_group & in_35_44_group & in_45_54_group:
-        age_range = ['25-34', '35-44', '45-54']
-    elif in_20_24_group & in_25_34_group:
-        age_range = ['20-24', '25-34']
-    elif in_25_34_group & in_35_44_group:
-        age_range = ['25-34', '35-44']
-    elif in_35_44_group & in_45_54_group:
-        age_range = ['35-44', '45-54']
-    elif in_20_24_group:
-        age_range = ['20-24']
-    elif in_25_34_group:
-        age_range = ['25-34']
-    elif in_35_44_group:
-        age_range = ['35-44']
-    elif in_45_54_group:
-        age_range = ['45-54']
+    # convert the categorical variable to a list of age ranges
+    age_range = age_range.dropna().unique().tolist()
 
-    # boolean variables to determine if income range is apart of the input
-    """
-    makes_between_70k_99k
-    makes_between_100k_199k
-    makes_more_200k
-    """
-    # determine the specific desired income ranges
-    # if max income of input is less than 99000 then it is apart of the 70k-99k group
-    # if min income of input is greater than 70000 then it is apart of the 70k-99k group
-    if income_max <= 99000 | income_min >= 70000:
-        makes_between_70k_99k = True
-    else:
-        makes_between_70k_99k = False
-    # if max income of input is less than 199000 then it is apart of the 100k-199k group
-    # if min income of input is greater than 100000 then it is apart of the 100k-199k group
-    if income_max <= 199000 | income_min >= 100000:
-        makes_between_100k_199k = True
-    else:
-        makes_between_100k_199k = False
-    # if min income of input is greater than 200000 then it is apart of the 200k+ group
-    if income_min >= 200000:
-        makes_more_200k = True
-    else:
-        makes_more_200k = False
+    # define the income ranges
+    ranges = [pd.Interval(left=70000, right=99000),
+              pd.Interval(left=100000, right=199000),
+              pd.Interval(left=200000, right=float('inf'))]
 
-    # determine which income ranges are apart of the desired group
-    if makes_between_70k_99k & makes_between_100k_199k & makes_more_200k:
-        income_range = ['$70,000 - $99,000', '$100,000 - $199,000', '$200,000+']
-    elif makes_between_70k_99k & makes_between_100k_199k:
-        income_range = ['$70,000 - $99,000', '$100,000 - $199,000']
-    elif makes_between_100k_199k & makes_more_200k:
-        income_range = ['$100,000 - $199,000', '$200,000+']
-    elif makes_between_70k_99k:
-        income_range = ['$70,000 - $99,000']
-    elif makes_between_100k_199k:
-        income_range = ['$100,000 - $199,000']
-    elif makes_more_200k:
-        income_range = ['$200,000+']
+    # create a boolean mask to determine which ranges the input income falls into
+    mask = pd.Series(False, index=range(len(ranges)))
+    for r in ranges:
+        if income_max >= r.left and income_min <= r.right:
+            mask[ranges.index(r)] = True
+
+    # determine the income ranges that the input income falls into
+    income_range = []
+    for i in range(len(ranges)):
+        if mask[i]:
+            income_range.append('$' + str(int(ranges[i].left)) + ' - $' + (
+                'inf' if pd.isna(ranges[i].right) else str(int(ranges[i].right))))
 
     # create new rows based on the input criteria
-    new_rows = create_rows(p_demo, age_range, household_makeup, income_range, location_density)
+    new_rows = create_rows(p_demo, age_range, makeup_of_household, has_kids_under_2, has_kids_3_5,
+                           has_kids_6_9, has_kids_10_14, has_kids_15_17, income_range, density_of_location)
 
     # convert the new_rows dictionary to a dataframe
     new_df = pd.DataFrame.from_dict(new_rows)
@@ -300,15 +286,14 @@ def expand_market(age_range_minimum, age_range_maximum, makeup_of_household, den
     new_p_demo = pd.concat([p_demo, new_df], ignore_index=True)
 
     # creates list of IDs of only the profiles of the aggregate marget that were added to p_demo
-    id_list = new_p_demo.loc[new_p_demo['id'] >= [p_demo['id'].max() + 1], 'id'].tolist()
+    # id_list = new_p_demo.loc[new_p_demo['id'] >= [p_demo['id'].max() + 1], 'id'].tolist()
+    added_ids = new_p_demo.iloc[len(p_demo):]['id'].tolist()
 
     # use building market function to get list of a list of
     # the CDP_Profiles that are the most closely related to aggregated
     # profile description that will raise of total population by the intended amount
-    output_list = building_market(id_list, population_increase, new_p_demo)
+    output_list = building_market(added_ids, population_increase, new_p_demo)
 
     # market_population is the group_population_est of those that meet the aggregate profile
     # output_list is a list of CDP_profiles
     return market_population, output_list
-
-

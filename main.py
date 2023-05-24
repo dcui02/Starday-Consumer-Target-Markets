@@ -9,6 +9,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.ensemble import RandomForestClassifier
 
 # Read the original CSV file, with the 1st row of questions showing
 questions_csv = pd.read_csv('/Users/davidcui02/Desktop/input.csv', header=None)
@@ -84,8 +85,6 @@ for i in range(0, len(questions_csv.columns)):
             output = pd.concat([output, tabulardata.multiple_answer_question(curr_question, original_csv)], axis=1)
     # update current question
     curr_question = questions_csv.columns[i]
-output.to_csv('/Users/davidcui02/Desktop/output.csv', index=False)
-open_responses.to_csv('/Users/davidcui02/Desktop/open_responses.csv', index=False)
 
 output.drop(['live_with_other_family_adults',
              'race_other',
@@ -101,6 +100,12 @@ output.drop(['live_with_other_family_adults',
              'grocery_purchase_cert_other',
              'grocery_product_other',
              'plant_based_other_issues'], axis=1, inplace=True)
+
+
+output.to_csv('/Users/davidcui02/Desktop/output.csv', index=False)
+open_responses.to_csv('/Users/davidcui02/Desktop/open_responses.csv', index=False)
+
+
 
 # first two columns that are the responder ID and custom data
 responder_info = null_columns.iloc[:, :2]
@@ -144,15 +149,15 @@ open_responses_final.to_csv('/Users/davidcui02/Desktop/open_responses.csv', inde
 
 # prep data
 data = pd.read_csv('/Users/davidcui02/Desktop/final.csv')
-X = data.drop(columns=['result'])
-X = data.drop(columns=['custom_data_ID'])
+X = data.drop(columns=['custom_data_ID'])  # Remove 'custom_data_ID' column only
+X = X.drop(columns=['result'])  # Remove 'result' column
 y = data['result']
 
 # train-test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 """
-# __________________ boost model ___________ 1.0 accuracy 
+# __________________ boost model ___________ 0.8192955589586524 
 # create model
 boost = HistGradientBoostingClassifier()
 # fit models
@@ -167,7 +172,7 @@ print("Boost: " + str(acc_boost))
 """
 
 """
-# __________________ svm model ___________ ->didn't like NaN values 
+# __________________ svm model ___________ 0.6447166921898928 
 # create model
 svm = svm.SVC(kernel='linear')
 # fit models
@@ -182,10 +187,18 @@ print("SVM: " + str(acc_svm))
 """
 
 """
-# __________________ knn model ___________ -> does not like NaN values
+# __________________ knn model ___________
+# n_neighbors=5: 0.5895865237366003
+# n_neighbors=10: 0.5926493108728943
+# n_neighbors=20: 0.6156202143950995
+# n_neighbors=25: 0.6294027565084227
+# n_neighbors=40: 0.6171516079632465
+# n_neighbors=50: 0.6278713629402757
+# n_neighbors=100: 0.6508422664624809
+
 # create model
 # edit n to find best result
-knn = KNeighborsClassifier(n_neighbors=5)
+knn = KNeighborsClassifier(n_neighbors=250)
 # fit models
 knn.fit(X_train, y_train)
 # make predictions
@@ -198,7 +211,7 @@ print("KNN: " + str(acc_knn))
 """
 
 """
-# __________________ lda model ___________ -> does not like NaN values
+# __________________ lda model ___________ 0.7856049004594181
 # create model
 lda = LinearDiscriminantAnalysis()
 # fit models
@@ -210,6 +223,22 @@ acc_lda = accuracy_score(predictions_lda, y_test)
 print("LDA: " + str(acc_lda))
 # saving model
 #filename = "lda.pickle"
+"""
+
+"""
+# __________________ random forest model ___________  0.8254211332312404
+# Create the random forest classifier
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# Fit the model to the training data
+rf.fit(X_train, y_train)
+
+# Make predictions on the test data
+predictions_rf = rf.predict(X_test)
+
+# Calculate the accuracy score
+acc_rf = accuracy_score(predictions_rf, y_test)
+print("Random Forest: " + str(acc_rf))
 """
 
 """
